@@ -1,15 +1,22 @@
 [tool.poetry]
 name = "sample"
 version = "0.1.0"
-description = ""
+description = "Kivy Project Sample"
 authors = ["MoriokaReimen <kei.nakata.job@gmail.com>"]
 readme = "README.md"
+
+packages = [
+  {include = "app" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 kivy = "^2.3.0"
-
+pytest = "^8.2.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+app = "app:main"

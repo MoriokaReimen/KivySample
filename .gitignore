@@ -1,3 +1,5 @@
 dist/*
 build/*
 *.lock
+.pytest_cache/*
+*.pyc
