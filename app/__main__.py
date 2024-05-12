@@ -5,21 +5,29 @@ from kivy.properties import ObjectProperty
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager
+from kivy.uix.textinput import TextInput
 import os
+import re
+
+class DataInput(TextInput):
+    pattern = re.compile('[^0-9a-fA-F]')
+    def insert_text(self, substring, from_undo=False):
+        pattern = self.pattern
+        filtered_text = re.sub(pattern, '', substring)
+        if len(self.text) % 3 == 2 and filtered_text != "":
+            filtered_text = ' ' + filtered_text
+        if len(self.text) >= 11:
+            filtered_text = ""
+        return super().insert_text(filtered_text, from_undo=from_undo)
 
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
 
-class SaveDialog(FloatLayout):
-    save = ObjectProperty(None)
-    text_input = ObjectProperty(None)
-    cancel = ObjectProperty(None)
-
-class Poot(FloatLayout):
+class Root(FloatLayout):
     loadfile = ObjectProperty(None)
-    savefile = ObjectProperty(None)
-    text_input = ObjectProperty(None)
+    console_text = ObjectProperty(None)
+    send_data = ObjectProperty(None)
 
     def dismiss_popup(self):
         self._popup.dismiss()
@@ -30,29 +38,21 @@ class Poot(FloatLayout):
                             size_hint=(0.9, 0.9))
         self._popup.open()
 
-    def show_save(self):
-        content = SaveDialog(save=self.save, cancel=self.dismiss_popup)
-        self._popup = Popup(title="Save file", content=content,
-                            size_hint=(0.9, 0.9))
-        self._popup.open()
-
     def load(self, path, filename):
         with open(os.path.join(path, filename[0])) as stream:
-            self.text_input.text = stream.read()
+            self.console_text.text = stream.read()
 
         self.dismiss_popup()
 
-    def save(self, path, filename):
-        with open(os.path.join(path, filename), 'w') as stream:
-            stream.write(self.text_input.text)
-        self.dismiss_popup()
+    def can_send(self):
+        print(f"Send Data: {self.send_data.text}")
+        self.console_text.text += f"Received: {self.send_data.text}\n"
 
 class MainApp(App):
     pass
 
 Factory.register('LoadDialog', cls=LoadDialog)
-Factory.register('Poot', cls=Poot)
-Factory.register('SaveDialog', cls=SaveDialog)
+Factory.register('Root', cls=Root)
 
 def main() -> None:
     MainApp().run()
